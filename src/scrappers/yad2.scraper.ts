@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-import { IScrapper, IScrapperOptions, Entry } from "./scrapper.interface";
+import { IScraper, IScraperOptions, Entry } from "./scrapper.interface";
 import { parsePrice } from '../utils';
 import { Logger } from 'winston';
 
@@ -21,13 +21,13 @@ export const cities: {[city: string]:number} = {
 }
 
 
-export class Yad2Scrapper implements IScrapper {
+export class Yad2Scraper implements IScraper {
 
     public constructor( private _logger : Logger) {
 
     }
 
-    public async fetch(options: IScrapperOptions): Promise<Entry[]> {
+    public async fetch(options: IScraperOptions): Promise<Entry[]> {
         this._logger.info('start fetching yad2');
         const url = this.buildUrl(options);
         this._logger.verbose(`built query url: ${url}`);
@@ -89,7 +89,7 @@ export class Yad2Scrapper implements IScrapper {
         return entries;
     }
 
-    private buildUrl(options: IScrapperOptions) : string {
+    private buildUrl(options: IScraperOptions) : string {
         const rangeToString = (range:{from:number,to:number}) : string => {
             return `${range.from}-${range.to}`;
         }

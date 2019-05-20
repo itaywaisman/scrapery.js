@@ -1,4 +1,4 @@
-export interface IScrapperOptions {
+export interface IScraperOptions {
     city: string,
     rooms: {
         from: number,
@@ -11,8 +11,8 @@ export interface IScrapperOptions {
     entryDate: string
 }
 
-export interface IScrapper {
-    fetch(options: IScrapperOptions) : Promise<Entry[]>;
+export interface IScraper {
+    fetch(options: IScraperOptions) : Promise<Entry[]>;
 }
 
 

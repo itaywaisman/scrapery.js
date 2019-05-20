@@ -1,9 +1,10 @@
 
 import * as winston from 'winston';
-import { ScrapperRunner } from "./scrapperRunner";
-import { Yad2Scrapper } from "./scrappers/yad2.scrapper";
-import { MongoExporter } from './exportes/mongo.exporter';
+import { ScrapersRunner } from "./scrapersRunner";
+import { Yad2Scraper } from "./scrappers/yad2.scraper";
+// import { MongoExporter } from './exporters/mongo.exporter';
 import { Entry } from './scrappers/scrapper.interface';
+import { MailExporter } from './exporters/mail.exporter';
 
 class Application {
     public main() : void {
@@ -14,8 +15,8 @@ class Application {
           });
 
 
-        const scrapperRunner = new ScrapperRunner([
-            new Yad2Scrapper(logger)
+        const scrapperRunner = new ScrapersRunner([
+            new Yad2Scraper(logger)
         ]);
 
         scrapperRunner.scrape({
@@ -30,8 +31,10 @@ class Application {
             },
             entryDate: '1-8-2019'
         }).then((entries: Entry[]) => {
-            let mongoExporter = new MongoExporter("mongodb://localhost:27017/rentals");
-            mongoExporter.export(entries);
+            // let mongoExporter = new MongoExporter("mongodb://localhost:27017/rentals", logger);
+            // mongoExporter.export(entries);
+            let mailExporter = new MailExporter();
+            mailExporter.export(entries);
         });
 
     }

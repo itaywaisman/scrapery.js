@@ -36,9 +36,9 @@ export class MongoExporter implements IExporter{
         mongoose.connect(connectionString, {useNewUrlParser: true});
     }
 
-    export(entries: Entry[]): void {
+    async export(entries: Entry[]): Promise<void> {
         try {
-            EntryModel.insertMany(entries);   
+            await EntryModel.insertMany(entries);   
         } catch (error) {
             this._logger.error("Error exporting to mongodb", error);
         }
