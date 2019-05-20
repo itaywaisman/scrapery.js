@@ -6,39 +6,36 @@ import { Yad2Scraper } from "./scrappers/yad2.scraper";
 import { Entry } from './scrappers/scrapper.interface';
 import { MailExporter } from './exporters/mail.exporter';
 
-class Application {
-    public main() : void {
-        const logger = winston.createLogger({
-            transports: [
-              new winston.transports.Console()
-            ]
-          });
-
-
-        const scrapperRunner = new ScrapersRunner([
-            new Yad2Scraper(logger)
-        ]);
-
-        scrapperRunner.scrape({
-            city: "herzeliya",
-            rooms: {
-                from: 2,
-                to: 3
-            },
-            price: {
-                from: 3000,
-                to: 5000
-            },
-            entryDate: '1-8-2019'
-        }).then((entries: Entry[]) => {
-            // let mongoExporter = new MongoExporter("mongodb://localhost:27017/rentals", logger);
-            // mongoExporter.export(entries);
-            let mailExporter = new MailExporter();
-            mailExporter.export(entries);
+async function main() : Promise<void> {
+    const logger = winston.createLogger({
+        transports: [
+            new winston.transports.Console()
+        ]
         });
 
-    }
+
+    const scrapperRunner = new ScrapersRunner([
+        new Yad2Scraper(logger)
+    ]);
+
+    scrapperRunner.scrape({
+        city: "herzeliya",
+        rooms: {
+            from: 2,
+            to: 3
+        },
+        price: {
+            from: 3000,
+            to: 5000
+        },
+        entryDate: '1-8-2019'
+    }).then((entries: Entry[]) => {
+        // let mongoExporter = new MongoExporter("mongodb://localhost:27017/rentals", logger);
+        // mongoExporter.export(entries);
+        let mailExporter = new MailExporter();
+        mailExporter.export(entries);
+    });
+
 }
 
-const application = new Application();
-application.main();
+main().catch(console.error);
