@@ -1,4 +1,5 @@
-import { IScraper, Entry, IScraperOptions } from "./scrapper.interface";
+import { IScraper, IScraperOptions } from "./scrapper.interface";
+import { Entry } from "../models/entry";
 
 export class KomoScraper implements IScraper {
     

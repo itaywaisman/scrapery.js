@@ -1,8 +1,9 @@
 import fetch from 'node-fetch';
 
-import { IScraper, IScraperOptions, Entry } from "./scrapper.interface";
+import { IScraper, IScraperOptions } from "./scrapper.interface";
 import { parsePrice } from '../utils';
 import { Logger } from 'winston';
+import { Entry } from '../models/entry';
 
 const requestHeaders = {
     "method": "GET",

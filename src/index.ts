@@ -3,8 +3,8 @@ import * as winston from 'winston';
 import { ScrapersRunner } from "./scrapersRunner";
 import { Yad2Scraper } from "./scrappers/yad2.scraper";
 // import { MongoExporter } from './exporters/mongo.exporter';
-import { Entry } from './scrappers/scrapper.interface';
 import { MailExporter } from './exporters/mail.exporter';
+import { Entry } from './models/entry';
 
 async function main() : Promise<void> {
     const logger = winston.createLogger({

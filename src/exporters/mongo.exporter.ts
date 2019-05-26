@@ -2,7 +2,7 @@ import mongoose , {Schema, Document} from 'mongoose';
 import { Logger } from 'winston';
 
 import { IExporter } from "./exporter.interface";
-import { Entry } from "../scrappers/scrapper.interface";
+import { Entry } from '../models/entry';
 
 type EntryType = Entry & Document;
 const EntryModel = mongoose.model<EntryType>('Entry', new Schema({
