@@ -1,10 +1,7 @@
 
 import * as winston from 'winston';
-import { ScrapersRunner } from "./scrapersRunner";
-import { Yad2Scraper } from "./scrappers/yad2.scraper";
-// import { MongoExporter } from './exporters/mongo.exporter';
-import { MailExporter } from './exporters/mail.exporter';
-import { Entry } from './models/entry';
+import { FlowSerializer } from './flowSerializer';
+import { FlowRunner } from './flowRunner';
 
 async function main() : Promise<void> {
     const logger = winston.createLogger({
@@ -14,28 +11,42 @@ async function main() : Promise<void> {
         });
 
 
-    const scrapperRunner = new ScrapersRunner([
-        new Yad2Scraper(logger)
-    ]);
-
-    scrapperRunner.scrape({
-        city: "herzeliya",
-        rooms: {
-            from: 2,
-            to: 3
+    let flowSerializer = new FlowSerializer(logger);
+    let flow = flowSerializer.deserialize({
+        options: {
+            cities: ["herzeliya","ranana","glil-yam","ramat-hasharon", "givataim", "ramat-gan"],
+            rooms: {
+                from: 2,
+                to: 3
+            },
+            price: {
+                from: 3000,
+                to: 5000
+            },
+            entryDate: '1-8-2019'
         },
-        price: {
-            from: 3000,
-            to: 5000
-        },
-        entryDate: '1-8-2019'
-    }).then((entries: Entry[]) => {
-        // let mongoExporter = new MongoExporter("mongodb://localhost:27017/rentals", logger);
-        // mongoExporter.export(entries);
-        let mailExporter = new MailExporter();
-        mailExporter.export(entries);
-    });
-
+        scrapers: [
+            {type: 'yad2'}
+        ],
+        transformers: [
+            { type: 'moovit' }, 
+            { type: 'google' }
+        ],
+        exporters: [
+            {
+                type: 'excel',
+                options: {
+                    fileName: 'C:\\Users\\Itay\\Google Drive\\rentals.xlsx',
+                    unique: true
+                }
+            }
+        ]
+    })
+    
+    let flowRunner = new FlowRunner();
+    flowRunner.runFlow(flow);
 }
 
 main().catch(console.error);
+
+

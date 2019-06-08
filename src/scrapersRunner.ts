@@ -1,5 +1,5 @@
-import { IScraper, IScraperOptions } from "./scrappers/scrapper.interface";
-import { Entry } from "./models/entry";
+import { IScraper, IScraperOptions } from "./interfaces/scrapper.interface";
+import { Entry } from "./interfaces/entry";
 
 export class ScrapersRunner {
     constructor(private _scrapers : IScraper[]) {}

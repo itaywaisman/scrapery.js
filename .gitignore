@@ -10,4 +10,4 @@ coverage
 
 yarn.lock
 
-/src/exporters/gmail.keys.ts
+src/config/gmail.keys.ts

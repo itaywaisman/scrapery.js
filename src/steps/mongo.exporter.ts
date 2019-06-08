@@ -1,8 +1,7 @@
 import mongoose , {Schema, Document} from 'mongoose';
 import { Logger } from 'winston';
-
-import { IExporter } from "./exporter.interface";
-import { Entry } from '../models/entry';
+import { Entry } from '../interfaces/entry';
+import { IStep } from '../interfaces/step.interface';
 
 type EntryType = Entry & Document;
 const EntryModel = mongoose.model<EntryType>('Entry', new Schema({
@@ -30,18 +29,22 @@ const EntryModel = mongoose.model<EntryType>('Entry', new Schema({
 }));
 
 
-export class MongoExporter implements IExporter{
+export class MongoExporter implements IStep {
 
-    constructor(connectionString: string, private _logger : Logger) {
-        mongoose.connect(connectionString, {useNewUrlParser: true});
+    private connectionString: string = "";
+
+    constructor(private _logger : Logger) {
     }
 
-    async export(entries: Entry[]): Promise<void> {
+    init(options?: any): void {
+        this.connectionString = options.connectionString
+        mongoose.connect(this.connectionString, {useNewUrlParser: true});
+    }
+    async execute(data: Entry[]): Promise<void> {
         try {
-            await EntryModel.insertMany(entries);   
+            await EntryModel.insertMany(data);   
         } catch (error) {
             this._logger.error("Error exporting to mongodb", error);
         }
     }
-
 }

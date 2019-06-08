@@ -1,9 +1,9 @@
 import fetch from 'node-fetch';
-
-import { IScraper, IScraperOptions } from "./scrapper.interface";
 import { parsePrice } from '../utils';
 import { Logger } from 'winston';
-import { Entry } from '../models/entry';
+import { Entry } from '../interfaces/entry';
+import { IStep } from '../interfaces/step.interface';
+import { IScraperOptions } from '../interfaces/scraperOptions.interface';
 
 const requestHeaders = {
     "method": "GET",
@@ -17,33 +17,36 @@ const requestHeaders = {
 };
 
 
-export const cities: {[city: string]:number} = {
-    "herzeliya" : 6400
+export const cities: {[city: string]:string} = {
+    "herzeliya" : "6400",
+    "ranana" : "8700",
+    "glil-yam": "0346",
+    "ramat-hasharon": "2650",
+    "givataim": "6300",
 }
 
 
-export class Yad2Scraper implements IScraper {
+export class Yad2Scraper implements IStep {
+    
 
     public constructor( private _logger : Logger) {
 
     }
 
-    public async fetch(options: IScraperOptions): Promise<Entry[]> {
-        this._logger.info('start fetching yad2');
-        const url = this.buildUrl(options);
-        this._logger.verbose(`built query url: ${url}`);
+    init(): void {
+        
+    }
 
-        const response = await fetch(url, requestHeaders);
-        this._logger.verbose(`got response from yad2`);
-        const data = await response.json();
-        this._logger.verbose(`parsed data into json`);
-        const ids = data.feed.feed_items
-            .filter((entry: any) => !entry.merchant)
-            .filter((entry: any) => entry.type == 'ad')
-            .map((entry: any) => entry.id);
+    async execute(data: any , parameters: IScraperOptions): Promise<Entry[]> {
+        this._logger.info('start fetching yad2');
+        let ids :string[]= [];
+        for(var i = 0; i<parameters.cities.length; ++i) {
+            let cityIds = await this.fetchCityEntries(cities[parameters.cities[i]], parameters);
+            ids.push(...cityIds);
+        }
         
         let entries : Entry[] = [];
-        this._logger.verbose(`requesting more data from yad2 for the ids`);
+        this._logger.info(`requesting more data from yad2 for the ids`);
         for (var i = 0; i< ids.length ; i++) {
 
             const id = ids[i];
@@ -58,6 +61,8 @@ export class Yad2Scraper implements IScraper {
                     streetName: fullData.street,
                     streetNumber: fullData.address_home_number
                 },
+                city: fullData.city_text,
+                coordinates: fullData.navigation_data.coordinates,
                 formattedAddress: `${fullData.neighborhood}, ${fullData.street} ${fullData.address_home_number}`,
                 price: parsePrice(fullData.price),
                 tax: parsePrice(fullData.property_tax),
@@ -69,10 +74,10 @@ export class Yad2Scraper implements IScraper {
             };
 
             entries.push(newEntry)
-        
+            
         }
 
-        this._logger.verbose(`requesting contact info for each entry`);
+        this._logger.info(`requesting contact info for each entry`);
         for (const entry in entries) {
             if (entries.hasOwnProperty(entry)) {
                 const element = entries[entry];
@@ -90,13 +95,26 @@ export class Yad2Scraper implements IScraper {
         return entries;
     }
 
-    private buildUrl(options: IScraperOptions) : string {
+    private async fetchCityEntries(cityId : string, options: IScraperOptions) : Promise<string[]> {
+        
+        const url = this.buildUrl(cityId, options);
+        this._logger.info(`built query for city: ${cityId}, url: ${url}`);
+
+        const response = await fetch(url, requestHeaders);
+        this._logger.info(`got response from yad2 for city ${cityId}`);
+        const data = await response.json();
+        this._logger.info(`parsed data into json for city ${cityId}`);
+        const ids = data.feed.feed_items
+            .filter((entry: any) => !entry.merchant)
+            .filter((entry: any) => entry.type == 'ad')
+            .map((entry: any) => entry.id);
+        return ids;
+    }
+
+    private buildUrl(cityId: string, options: IScraperOptions) : string {
         const rangeToString = (range:{from:number,to:number}) : string => {
             return `${range.from}-${range.to}`;
         }
-        return `https://www.yad2.co.il/api/pre-load/getFeedIndex/realestate/rent?city=${cities[options.city]}&rooms=${rangeToString(options.rooms)}&price=${rangeToString(options.price)}&EnterDate=${options.entryDate}`;
+        return `https://www.yad2.co.il/api/pre-load/getFeedIndex/realestate/rent?city=${cityId}&rooms=${rangeToString(options.rooms)}&price=${rangeToString(options.price)}&EnterDate=${options.entryDate}`;
     }
-    
-    
-    
 }

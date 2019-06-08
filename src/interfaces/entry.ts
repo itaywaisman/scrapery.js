@@ -6,7 +6,14 @@ export interface Entry {
         streetNumber?: number,
         streetName: string
     },
+    city?: string,
+    coordinates?:{
+        longitude: string,
+        latitude: string
+    },
     formattedAddress: string,
+    googleMapsLink?: string,
+    moovitLink?: string,
     price: number,
     tax: number,
     houseComitee: number,

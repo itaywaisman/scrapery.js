@@ -1,7 +1,8 @@
-import { ITransformer } from "./transformer.interface";
-import { Entry } from "../models/entry";
+import { Entry } from "../interfaces/entry";
+import { IStep } from "../interfaces/step.interface";
 
 const excel = require('node-excel-export');
+
 
 const styles = {
     headerDark: {
@@ -35,21 +36,37 @@ const styles = {
     }
 };
 
-export class ExcelTransformer implements ITransformer<Buffer> {
-    transform(entries: Entry[]): Buffer {
+export class ExcelTransformer implements IStep{
+    
+    init(): void {
+
+    }
+
+    async execute(data: Entry[]): Promise<Buffer> {
+
         const specification = {
-            id: {
-                displayName: 'מזהה',
-                headerStyle: styles.headerDark, 
-                width: '5' 
-            },
             adNumber: {
                 displayName: 'מספר מודעה',
                 headerStyle: styles.headerDark, 
                 width: '5' 
             },
+            url: {
+                displayName: 'קישור',
+                headerStyle: styles.headerDark, 
+                width: '20' 
+            },
             formattedAddress: {
                 displayName: 'כתובת',
+                headerStyle: styles.headerDark, 
+                width: '30' 
+            },
+            city: {
+                displayName: 'עיר',
+                headerStyle: styles.headerDark, 
+                width: '8' 
+            },
+            moovitLink : {
+                displayName: 'מסלול לבינתחומי',
                 headerStyle: styles.headerDark, 
                 width: '30' 
             },
@@ -65,11 +82,6 @@ export class ExcelTransformer implements ITransformer<Buffer> {
             },
             houseComitee: {
                 displayName: 'ועד בית',
-                headerStyle: styles.headerDark, 
-                width: '5' 
-            },
-            totalAfterBills: {
-                displayName: 'סה"כ',
                 headerStyle: styles.headerDark, 
                 width: '5' 
             },
@@ -97,11 +109,6 @@ export class ExcelTransformer implements ITransformer<Buffer> {
                 displayName: 'איש קשר',
                 headerStyle: styles.headerDark, 
                 width: '30' 
-            },
-            url: {
-                displayName: 'קישור',
-                headerStyle: styles.headerDark, 
-                width: '20' 
             }
           }
                       
@@ -110,12 +117,12 @@ export class ExcelTransformer implements ITransformer<Buffer> {
               {
                 merges: [],
                 specification: specification,
-                data: entries 
+                data: data 
               }
             ]
           );
            
-          return report;           
+          return report;
     }
 
 }

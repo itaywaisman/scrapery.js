@@ -1,7 +1,5 @@
-import { Entry } from "../models/entry";
-
 export interface IScraperOptions {
-    city: string,
+    cities: string[],
     rooms: {
         from: number,
         to: number
@@ -11,8 +9,4 @@ export interface IScraperOptions {
         to: number
     },
     entryDate: string
-}
-
-export interface IScraper {
-    fetch(options: IScraperOptions) : Promise<Entry[]>;
 }
