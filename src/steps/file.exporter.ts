@@ -4,21 +4,18 @@ import { IStep } from '../interfaces/step.interface';
 
 export class FileExporter implements IStep {
 
-    private fileName: string = "";
-
     constructor(private logger: Logger) {
     }
 
-    init(options?: any): void {
-        this.fileName = options.fileName;
+    init(): void {
     }
 
-    async execute(data: Buffer): Promise<void> {
+    async execute(data: Buffer, parameters?: any): Promise<void> {
         try {
-            if (fs.existsSync(this.fileName)) {
-                fs.unlinkSync(this.fileName);
+            if (fs.existsSync(parameters.fileName)) {
+                fs.unlinkSync(parameters.fileName);
             }
-            fs.writeFileSync(this.fileName, data);
+            fs.writeFileSync(parameters.fileName, data);
         } catch(err) {
             this.logger.error(err)
         }    

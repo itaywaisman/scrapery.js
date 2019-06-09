@@ -1,4 +1,3 @@
-import { Entry } from "../interfaces/entry";
 import { Logger } from "winston";
 import { IStep } from "../interfaces/step.interface";
 
@@ -10,8 +9,8 @@ constructor(private _logger : Logger) {}
         this._logger.debug(options);
     }
 
-    async execute(data: void): Promise<Entry[]> {
-        return [];
+    async execute(data: any): Promise<any> {
+        return data;
     }
 
 

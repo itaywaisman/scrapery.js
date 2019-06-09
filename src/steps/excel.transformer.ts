@@ -1,5 +1,6 @@
 import { Entry } from "../interfaces/entry";
 import { IStep } from "../interfaces/step.interface";
+import { Logger } from "winston";
 
 const excel = require('node-excel-export');
 
@@ -38,12 +39,16 @@ const styles = {
 
 export class ExcelTransformer implements IStep{
     
+    public constructor( private _logger : Logger) {
+
+    }
+
     init(): void {
 
     }
 
     async execute(data: Entry[]): Promise<Buffer> {
-
+        this._logger.info("transforming to excel");
         const specification = {
             adNumber: {
                 displayName: 'מספר מודעה',

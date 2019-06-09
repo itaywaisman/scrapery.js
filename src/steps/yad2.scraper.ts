@@ -38,7 +38,7 @@ export class Yad2Scraper implements IStep {
     }
 
     async execute(data: any , parameters: IScraperOptions): Promise<Entry[]> {
-        this._logger.info('start fetching yad2');
+        this._logger.info('start fetching yad2', data);
         let ids :string[]= [];
         for(var i = 0; i<parameters.cities.length; ++i) {
             let cityIds = await this.fetchCityEntries(cities[parameters.cities[i]], parameters);
