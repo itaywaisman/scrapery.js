@@ -27,4 +27,7 @@ export interface Entry {
     contactName?: string,
     contactPhone?: string,
     formattedContact?: string,
+    isDeleted?: boolean,
+    seeDate?: Date,
+    comments?: string,
 }

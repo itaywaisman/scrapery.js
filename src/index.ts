@@ -3,8 +3,10 @@ import * as winston from 'winston';
 import { FlowRunner } from './flowRunner';
 import { Yad2Scraper } from './steps/yad2.scraper';
 import { MoovitTransformer } from './steps/moovit.transformers';
-import { ExcelTransformer } from './steps/excel.transformer';
-import { FileExporter } from './steps/file.exporter';
+import { MongoLoader } from './steps/mongo.loader';
+import { MongoExporter } from './steps/mongo.exporter';
+import { GoogleMapsTransformer } from './steps/googleMaps.transformer';
+import { ExcludeTransformer } from './steps/exclude.transformer';
 
 async function main() : Promise<void> {
     const logger = winston.createLogger({
@@ -12,46 +14,25 @@ async function main() : Promise<void> {
             new winston.transports.Console()
         ]
         });
-
-    // let flow = flowSerializer.deserialize({
-    //     options: {
-    //         cities: ["herzeliya","ranana","glil-yam","ramat-hasharon", "givataim", "ramat-gan"],
-    //         rooms: {
-    //             from: 2,
-    //             to: 3
-    //         },
-    //         price: {
-    //             from: 3000,
-    //             to: 5000
-    //         },
-    //         entryDate: '1-8-2019'
-    //     },
-    //     scrapers: [
-    //         {type: 'yad2'}
-    //     ],
-    //     transformers: [
-    //         { type: 'moovit' }, 
-    //         { type: 'google' }
-    //     ],
-    //     exporters: [
-    //         {
-    //             type: 'excel',
-    //             options: {
-    //                 fileName: 'C:\\Users\\Itay\\Google Drive\\rentals.xlsx',
-    //                 unique: true
-    //             }
-    //         }
-    //     ]
-    // })
     
-    let flowRunner = new FlowRunner();
+    let flowRunner = new FlowRunner({
+        "mongo-loader" : {
+            connectionString: "mongodb://localhost:27017/rentals"
+        },
+        "mongo-exporter" : {
+            connectionString: "mongodb://localhost:27017/rentals"
+        }
+    });
     logger.info("starting flow", flowRunner);
     flowRunner.runFlow({
         steps: {
+            "mongo-loader" : {
+                step: new MongoLoader(logger)
+            },
             "yad2": {
                 step: new Yad2Scraper(logger),
                 parameters: {
-                    cities: ["herzeliya","ranana","glil-yam","ramat-hasharon", "givataim", "ramat-gan"],
+                    cities: ["herzeliya","ranana"],
                     rooms: {
                         from: 2,
                         to: 3
@@ -63,24 +44,30 @@ async function main() : Promise<void> {
                     entryDate: '1-8-2019'
                 },
             },
+            "exclude" :{
+                step: new ExcludeTransformer(),
+                parameters: {
+                    excludeIn: "yad2",
+                    excludeFrom: "mongo-loader",
+                    comparator: (item1: any, item2: any) => item1.id == item2.id
+                }
+            },
             "moovit": {
                 step : new MoovitTransformer(logger)
             },
-            "excel" : {
-                step: new ExcelTransformer(logger),
+            "googleMaps" : {
+                step: new GoogleMapsTransformer()
             },
-            "file" : {
-                step: new FileExporter(logger),
-                parameters: {
-                    fileName: 'C:\\Users\\Itay\\Google Drive\\rentals.xlsx',
-                    unique: true
-                }
+            "mongo-exporter" : {
+                step: new MongoExporter(logger)
             }
         },
         edges: [
-            {fromId: "yad2", toId: "moovit"},
-            {fromId: "moovit", toId: "excel"},
-            {fromId: "excel", toId: "file"}
+            {fromId: "mongo-loader", toId: "exclude"},
+            {fromId: "yad2", toId: "exclude"},
+            {fromId: "exclude", toId: "moovit"},
+            {fromId: "moovit", toId: "googleMaps"},
+            {fromId: "googleMaps", toId: "mongo-exporter"}
         ]
     });
 }
